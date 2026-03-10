@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth.routes';
 import patientRoutes from './routes/patient.routes';
 import doctorRoutes from './routes/doctor.routes';
+import appointmentRoutes from './routes/appointment.routes';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

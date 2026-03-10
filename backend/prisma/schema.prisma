@@ -25,6 +25,13 @@ enum Gender {
   OTHER
 }
 
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -47,6 +54,7 @@ model Staff {
   address      String?
   
   user         User     @relation(fields: [userId], references: [id])
+  appointments Appointment[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -64,7 +72,24 @@ model Patient {
   address      String?
   
   user         User?    @relation(fields: [userId], references: [id])
+  appointments Appointment[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model Appointment {
+  id           String            @id @default(uuid())
+  patientId    String
+  doctorId     String
+  appointmentDate DateTime
+  reason       String?
+  status       AppointmentStatus @default(SCHEDULED)
+  tokenNumber  Int?
+
+  patient      Patient           @relation(fields: [patientId], references: [id])
+  doctor       Staff             @relation(fields: [doctorId], references: [id])
+
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 }
