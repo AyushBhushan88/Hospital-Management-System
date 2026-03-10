@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 const menuItems = [
   { name: 'Dashboard', href: '/', icon: '📊' },
+  { name: 'Register Patient', href: '/patients/register', icon: '📝' },
   { name: 'Appointments', href: '/appointments', icon: '📅' },
   { name: 'Patients', href: '/patients', icon: '👤' },
   { name: 'OPD Management', href: '/opd', icon: '🏥' },
