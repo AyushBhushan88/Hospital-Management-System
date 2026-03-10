@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient, LabRequestStatus } from '@prisma/client';
 import { generateAutoInvoice } from '../utils/billing';
+import { notifyLabResult } from '../utils/notifications';
 
 const prisma = new PrismaClient();
 
@@ -85,10 +86,21 @@ export const reportResult = async (req: Request, res: Response) => {
         }
       });
 
-      await tx.labRequest.update({
+      const updatedRequest = await tx.labRequest.update({
         where: { id: labRequestId },
-        data: { status: 'RESULT_REPORTED' }
+        data: { status: 'RESULT_REPORTED' },
+        include: { 
+          patient: true,
+          testType: true
+        }
       });
+
+      // Trigger Notification
+      notifyLabResult(
+        updatedRequest.patient.contactNo,
+        `${updatedRequest.patient.firstName} ${updatedRequest.patient.lastName}`,
+        updatedRequest.testType.name
+      );
 
       return newResult;
     });

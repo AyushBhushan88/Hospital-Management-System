@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient, AppointmentStatus } from '@prisma/client';
+import { notifyAppointment } from '../utils/notifications';
 
 const prisma = new PrismaClient();
 
@@ -7,7 +8,6 @@ export const bookAppointment = async (req: Request, res: Response) => {
   try {
     const { patientId, doctorId, appointmentDate, reason } = req.body;
 
-    // Optional: Auto-generate token number for the day
     const dayStart = new Date(appointmentDate);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(appointmentDate);
@@ -31,7 +31,19 @@ export const bookAppointment = async (req: Request, res: Response) => {
         reason,
         tokenNumber: count + 1,
       },
+      include: {
+        patient: true,
+        doctor: true
+      }
     });
+
+    // Trigger Notification
+    notifyAppointment(
+      appointment.patient.contactNo, 
+      `${appointment.patient.firstName} ${appointment.patient.lastName}`,
+      new Date(appointment.appointmentDate).toLocaleString(),
+      `${appointment.doctor.firstName} ${appointment.doctor.lastName}`
+    );
 
     res.status(201).json({ message: 'Appointment booked successfully', appointment });
   } catch (error) {
@@ -44,7 +56,6 @@ export const getAppointments = async (req: Request, res: Response) => {
     const { role, userId } = (req as any).user;
     let where: any = {};
 
-    // Filter appointments based on user role
     if (role === 'PATIENT') {
       const patient = await prisma.patient.findUnique({ where: { userId } });
       where = { patientId: patient?.id };
