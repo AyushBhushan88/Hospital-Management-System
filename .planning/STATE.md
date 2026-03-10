@@ -18,7 +18,7 @@
 - [ ] Build Appointment Scheduling system with token generation.
 
 ## Active Phase: Phase 2 (OPD & Patient Onboarding)
-- [ ] Patient Registration
+- [x] Patient Registration
 - [ ] Doctor Management
 - [ ] Appointment Booking
 - [ ] OPD Dashboards
