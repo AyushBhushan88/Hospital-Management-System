@@ -135,6 +135,12 @@ export default function AppointmentList() {
                     <td className="px-6 py-4 text-right space-x-2">
                       {app.status === 'SCHEDULED' && (
                         <>
+                          <Link 
+                            href={`/consultations/record/${app.id}`}
+                            className="text-primary hover:text-blue-800 text-xs font-bold mr-2"
+                          >
+                            Record Clinical
+                          </Link>
                           <button 
                             onClick={() => updateStatus(app.id, 'COMPLETED')}
                             className="text-green-600 hover:text-green-800 text-xs font-bold"

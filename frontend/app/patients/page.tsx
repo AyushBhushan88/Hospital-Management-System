@@ -127,8 +127,9 @@ export default function PatientList() {
                       <td className="px-6 py-4">
                         {new Date(patient.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="font-medium text-primary hover:underline">View History</button>
+                      <td className="px-6 py-4 text-right space-x-2">
+                        <Link href={`/patients/${patient.id}/emr`} className="font-bold text-primary hover:underline mr-3">EMR</Link>
+                        <button className="font-medium text-gray-400 hover:text-gray-600">View History</button>
                       </td>
                     </tr>
                   );
