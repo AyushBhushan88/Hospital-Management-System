@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { generateAutoInvoice } from '../utils/billing';
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,10 @@ export const createConsultation = async (req: Request, res: Response) => {
       notes, 
       medicines 
     } = req.body;
+
+    // Fetch doctor's fee
+    const doctor = await prisma.staff.findUnique({ where: { id: doctorId } });
+    const consultationFee = doctor?.consultationFee || 0;
 
     const consultation = await prisma.$transaction(async (tx) => {
       // 1. Create Consultation
@@ -48,6 +53,22 @@ export const createConsultation = async (req: Request, res: Response) => {
         where: { id: appointmentId },
         data: { status: 'COMPLETED' }
       });
+
+      // 4. Automatically generate invoice for the consultation fee
+      if (consultationFee > 0) {
+        await generateAutoInvoice(
+          patientId,
+          doctorId,
+          [{
+            description: `Consultation Fee - Dr. ${doctor?.firstName} ${doctor?.lastName}`,
+            quantity: 1,
+            unitPrice: consultationFee,
+            amount: consultationFee
+          }],
+          consultationFee,
+          tx
+        );
+      }
 
       return con;
     });
