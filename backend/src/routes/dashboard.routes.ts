@@ -6,7 +6,10 @@ const router = Router();
 
 router.use(authenticate);
 
+// General dashboard stats (Any role)
 router.get('/stats', getDashboardStats);
+
+// Admin-only financial analytics
 router.get('/analytics', authorize(['ADMIN']), getAdminAnalytics);
 
 export default router;

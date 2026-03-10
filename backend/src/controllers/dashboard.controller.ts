@@ -66,7 +66,6 @@ export const getAdminAnalytics = async (req: Request, res: Response) => {
     });
 
     // 3. Department-wise Revenue Breakdown
-    // We'll calculate this by iterating through invoice items
     const allInvoices = await prisma.invoice.findMany({
       select: { items: true, status: true, totalAmount: true, paidAmount: true }
     });
