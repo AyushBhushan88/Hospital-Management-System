@@ -70,6 +70,8 @@ model User {
 
   staff     Staff?
   patient   Patient?
+
+  @@index([email])
 }
 
 model Staff {
@@ -94,6 +96,8 @@ model Staff {
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Patient {
@@ -118,6 +122,9 @@ model Patient {
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([firstName, lastName])
+  @@index([contactNo])
 }
 
 model Appointment {
@@ -135,6 +142,10 @@ model Appointment {
 
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
+
+  @@index([appointmentDate])
+  @@index([patientId])
+  @@index([doctorId])
 }
 
 model Consultation {
@@ -161,6 +172,9 @@ model Consultation {
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+
+  @@index([patientId])
+  @@index([doctorId])
 }
 
 model Prescription {
@@ -220,6 +234,8 @@ model Admission {
 
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@index([patientId])
 }
 
 model NursingLog {
@@ -239,6 +255,8 @@ model NursingLog {
   nurse        Staff     @relation(fields: [nurseId], references: [id])
 
   createdAt    DateTime  @default(now())
+
+  @@index([admissionId])
 }
 
 // --- Laboratory Models ---
@@ -267,6 +285,9 @@ model LabRequest {
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+
+  @@index([patientId])
+  @@index([status])
 }
 
 model LabResult {
@@ -297,6 +318,8 @@ model Medicine {
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([name])
 }
 
 model PharmacySale {
@@ -312,6 +335,9 @@ model PharmacySale {
   pharmacist   Staff    @relation("Pharmacist", fields: [pharmacistId], references: [id])
 
   createdAt    DateTime @default(now())
+
+  @@index([patientId])
+  @@index([createdAt])
 }
 
 // --- Billing Models ---
@@ -334,6 +360,10 @@ model Invoice {
   
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+
+  @@index([patientId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Payment {
@@ -348,4 +378,8 @@ model Payment {
   patient      Patient       @relation(fields: [patientId], references: [id])
   
   createdAt    DateTime      @default(now())
+
+  @@index([invoiceId])
+  @@index([patientId])
+  @@index([createdAt])
 }
