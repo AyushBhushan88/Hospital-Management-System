@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient, BedStatus } from '@prisma/client';
+import { generateAutoInvoice } from '../utils/billing';
 
 const prisma = new PrismaClient();
 
@@ -7,11 +8,11 @@ const prisma = new PrismaClient();
 
 export const createWard = async (req: Request, res: Response) => {
   try {
-    const { name, type, bedCount } = req.body;
+    const { name, type, pricePerDay, bedCount } = req.body;
     
     const ward = await prisma.$transaction(async (tx) => {
       const newWard = await tx.ward.create({
-        data: { name, type }
+        data: { name, type, pricePerDay }
       });
 
       // Automatically create beds for the ward
@@ -80,30 +81,61 @@ export const admitPatient = async (req: Request, res: Response) => {
 
 export const dischargePatient = async (req: Request, res: Response) => {
   try {
-    const { admissionId } = req.params;
+    const { id } = req.params;
+    const { userId } = (req as any).user;
 
-    const admission = await prisma.$transaction(async (tx) => {
-      const current = await tx.admission.findUnique({ where: { id: admissionId } });
+    const staff = await prisma.staff.findUnique({ where: { userId } });
+    if (!staff) return res.status(403).json({ message: 'Staff record not found' });
+
+    const result = await prisma.$transaction(async (tx) => {
+      const current = await tx.admission.findUnique({ 
+        where: { id },
+        include: { bed: { include: { ward: true } } }
+      });
       if (!current) throw new Error('Admission record not found');
+      if (current.status === 'DISCHARGED') throw new Error('Patient already discharged');
 
-      // 1. Update Admission record
+      const dischargeDate = new Date();
+      const admissionDate = new Date(current.admissionDate);
+      
+      const diffTime = Math.abs(dischargeDate.getTime() - admissionDate.getTime());
+      const stayDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+      
+      const pricePerDay = current.bed.ward.pricePerDay || 0;
+      const totalBedCharges = stayDays * pricePerDay;
+
       const updated = await tx.admission.update({
-        where: { id: admissionId },
-        data: { status: 'DISCHARGED', dischargeDate: new Date() }
+        where: { id },
+        data: { status: 'DISCHARGED', dischargeDate }
       });
 
-      // 2. Free up the bed
       await tx.bed.update({
         where: { id: current.bedId },
         data: { status: 'AVAILABLE' }
       });
 
+      if (totalBedCharges > 0) {
+        await generateAutoInvoice(
+          current.patientId,
+          staff.id,
+          [{
+            description: `IPD Stay: ${current.bed.ward.name} (${stayDays} days @ $${pricePerDay}/day)`,
+            quantity: stayDays,
+            unitPrice: pricePerDay,
+            amount: totalBedCharges
+          }],
+          totalBedCharges,
+          tx
+        );
+      }
+
       return updated;
     });
 
-    res.json(admission);
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error discharging patient', error: (error as any).message });
+    console.error('Discharge Error:', error);
+    res.status(500).json({ message: (error as any).message || 'Error discharging patient' });
   }
 };
 

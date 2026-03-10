@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 
 interface Patient { id: string; firstName: string; lastName: string; }
 interface Doctor { id: string; firstName: string; lastName: string; }
-interface Bed { id: string; bedNumber: string; ward: { name: string } }
+interface Bed { id: string; bedNumber: string; ward: { name: string; pricePerDay: number } }
 
 export default function NewAdmission() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function NewAdmission() {
         const wards = await wRes.json();
         const beds = wards.flatMap((w: any) => 
           w.beds.filter((b: any) => b.status === 'AVAILABLE')
-            .map((b: any) => ({ ...b, ward: { name: w.name } }))
+            .map((b: any) => ({ ...b, ward: { name: w.name, pricePerDay: w.pricePerDay } }))
         );
         setAvailableBeds(beds);
       }
@@ -79,6 +79,8 @@ export default function NewAdmission() {
       setLoading(false);
     }
   };
+
+  const selectedBed = availableBeds.find(b => b.id === formData.bedId);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -129,9 +131,14 @@ export default function NewAdmission() {
               >
                 <option value="">-- Select Available Bed --</option>
                 {availableBeds.map(b => (
-                  <option key={b.id} value={b.id}>{b.ward.name} - Bed {b.bedNumber.split('-').pop()}</option>
+                  <option key={b.id} value={b.id}>{b.ward.name} - Bed {b.bedNumber.split('-').pop()} (${b.ward.pricePerDay}/day)</option>
                 ))}
               </select>
+              {selectedBed && (
+                <p className="text-xs text-blue-600 font-medium mt-1">
+                  Estimated Charge: ${selectedBed.ward.pricePerDay} per day
+                </p>
+              )}
             </div>
 
             <Input 

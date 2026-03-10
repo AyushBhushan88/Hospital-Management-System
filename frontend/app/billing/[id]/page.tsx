@@ -96,11 +96,19 @@ export default function InvoiceDetailPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <button onClick={() => router.back()} className="mb-6 text-blue-600 hover:underline">
-        ← Back to Invoices
-      </button>
+      <div className="flex justify-between items-center mb-6 no-print">
+        <button onClick={() => router.back()} className="text-blue-600 hover:underline">
+          ← Back to Invoices
+        </button>
+        <button 
+          onClick={() => window.print()} 
+          className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition flex items-center gap-2"
+        >
+          🖨️ Print Receipt
+        </button>
+      </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+      <div id="invoice-content" className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8 print:shadow-none print:border-none">
         <div className="p-8 border-b border-gray-100 flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">INVOICE</h1>

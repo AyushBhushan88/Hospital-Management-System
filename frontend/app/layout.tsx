@@ -27,11 +27,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Header />
-        <div className="flex pt-16 overflow-hidden bg-gray-50 h-screen">
-          <Sidebar />
-          <div className="relative w-full h-full overflow-y-auto lg:ml-64">
-            <main className="p-4 lg:p-8">
+        <div className="no-print">
+          <Header />
+        </div>
+        <div className="flex pt-16 overflow-hidden bg-gray-50 h-screen print:pt-0 print:bg-white print:h-auto">
+          <div className="no-print">
+            <Sidebar />
+          </div>
+          <div className="relative w-full h-full overflow-y-auto lg:ml-64 print:ml-0 print:h-auto print:overflow-visible">
+            <main className="p-4 lg:p-8 print:p-0">
               {children}
             </main>
           </div>

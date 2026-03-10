@@ -181,6 +181,7 @@ model Ward {
   id        String   @id @default(uuid())
   name      String   @unique
   type      String   // General, ICU, Semi-Private, Private
+  pricePerDay Float  @default(0)
   beds      Bed[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
