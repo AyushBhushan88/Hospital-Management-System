@@ -45,6 +45,20 @@ enum LabRequestStatus {
   CANCELLED
 }
 
+enum InvoiceStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  INSURANCE
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -74,6 +88,7 @@ model Staff {
   labRequests  LabRequest[] @relation("RequestingDoctor")
   labResults   LabResult[]  @relation("LabTechnician")
   pharmacySales PharmacySale[] @relation("Pharmacist")
+  invoicesCreated Invoice[] @relation("InvoiceCreator")
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -96,6 +111,8 @@ model Patient {
   admissions   Admission[]
   labRequests  LabRequest[]
   pharmacySales PharmacySale[]
+  invoices      Invoice[]
+  payments      Payment[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -293,3 +310,40 @@ model PharmacySale {
 
   createdAt    DateTime @default(now())
 }
+
+// --- Billing Models ---
+
+model Invoice {
+  id           String        @id @default(uuid())
+  patientId    String
+  createdById  String        // Staff member who generated the invoice
+  totalAmount  Float
+  paidAmount   Float         @default(0)
+  balanceAmount Float
+  status       InvoiceStatus @default(PENDING)
+  
+  // JSON array of items: [{ description: "Consultation Fee", quantity: 1, unitPrice: 500, amount: 500 }]
+  items        Json          
+  
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  createdBy    Staff         @relation("InvoiceCreator", fields: [createdById], references: [id])
+  payments     Payment[]
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Payment {
+  id           String        @id @default(uuid())
+  invoiceId    String
+  patientId    String
+  amount       Float
+  paymentMethod PaymentMethod
+  transactionId String?      // For card/UPI transactions
+  
+  invoice      Invoice       @relation(fields: [invoiceId], references: [id])
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  
+  createdAt    DateTime      @default(now())
+}
+

@@ -11,6 +11,7 @@ import consultationRoutes from './routes/consultation.routes';
 import ipdRoutes from './routes/ipd.routes';
 import labRoutes from './routes/lab.routes';
 import pharmacyRoutes from './routes/pharmacy.routes';
+import invoiceRoutes from './routes/invoice.routes';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/consultations', consultationRoutes);
 app.use('/api/ipd', ipdRoutes);
 app.use('/api/lab', labRoutes);
 app.use('/api/pharmacy', pharmacyRoutes);
+app.use('/api/billing', invoiceRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
