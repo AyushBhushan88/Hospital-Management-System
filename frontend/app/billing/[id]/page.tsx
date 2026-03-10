@@ -100,6 +100,27 @@ export default function InvoiceDetailsPage({ params }: { params: Promise<{ id: s
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/billing/${id}/download`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt-${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error('Download Error:', error);
+      alert('Error downloading receipt');
+    }
+  };
+
   if (loading) return <div className="p-6">Loading invoice details...</div>;
   if (!invoice) return <div className="p-6 text-red-500">Invoice not found.</div>;
 
@@ -111,7 +132,7 @@ export default function InvoiceDetailsPage({ params }: { params: Promise<{ id: s
           <p className="text-gray-500 text-sm">ID: {invoice.id}</p>
           <p className="text-gray-500 text-sm">Date: {new Date(invoice.createdAt).toLocaleDateString()}</p>
         </div>
-        <div className="text-right">
+        <div className="text-right flex flex-col items-end gap-3">
           <span className={`px-4 py-2 rounded-full text-sm font-bold ${
             invoice.status === 'PAID' ? 'bg-green-100 text-green-800' :
             invoice.status === 'PARTIALLY_PAID' ? 'bg-yellow-100 text-yellow-800' :
@@ -119,6 +140,12 @@ export default function InvoiceDetailsPage({ params }: { params: Promise<{ id: s
           }`}>
             {invoice.status}
           </span>
+          <button 
+            onClick={handleDownload}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm border border-blue-100 px-3 py-1 rounded-lg hover:bg-blue-50 transition"
+          >
+            <span>Download PDF</span>
+          </button>
         </div>
       </div>
 

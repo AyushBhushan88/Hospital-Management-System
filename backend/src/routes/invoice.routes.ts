@@ -3,7 +3,8 @@ import {
   createInvoice, 
   getInvoices, 
   getInvoiceById, 
-  recordPayment 
+  recordPayment,
+  downloadReceipt 
 } from '../controllers/invoice.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
@@ -22,5 +23,8 @@ router.get('/:id', authorize(['ADMIN', 'RECEPTIONIST', 'DOCTOR']), getInvoiceByI
 
 // Record payment (Receptionist/Admin)
 router.post('/payment', authorize(['ADMIN', 'RECEPTIONIST']), recordPayment);
+
+// Download PDF receipt
+router.get('/:id/download', authorize(['ADMIN', 'RECEPTIONIST', 'DOCTOR']), downloadReceipt);
 
 export default router;

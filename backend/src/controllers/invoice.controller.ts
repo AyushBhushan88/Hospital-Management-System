@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient, InvoiceStatus, PaymentMethod } from '@prisma/client';
+import { generateReceiptPDF } from '../utils/billing';
 
 const prisma = new PrismaClient();
 
@@ -110,5 +111,29 @@ export const recordPayment = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Record Payment Error:', error);
     res.status(500).json({ message: error.message || 'Error recording payment' });
+  }
+};
+
+export const downloadReceipt = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        patient: true,
+        createdBy: true
+      }
+    });
+
+    if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
+
+    const pdfBuffer = await generateReceiptPDF(invoice);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=receipt-${id}.pdf`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('PDF Generation Error:', error);
+    res.status(500).json({ message: 'Error generating PDF receipt' });
   }
 };
