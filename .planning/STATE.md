@@ -19,7 +19,7 @@
 
 ## Active Phase: Phase 2 (OPD & Patient Onboarding)
 - [x] Patient Registration
-- [ ] Doctor Management
+- [x] Doctor Management
 - [ ] Appointment Booking
 - [ ] OPD Dashboards
 
