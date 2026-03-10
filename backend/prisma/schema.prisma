@@ -32,6 +32,12 @@ enum AppointmentStatus {
   NO_SHOW
 }
 
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -56,6 +62,8 @@ model Staff {
   user         User     @relation(fields: [userId], references: [id])
   appointments Appointment[]
   consultations Consultation[]
+  admissions   Admission[] @relation("AdmittingDoctor")
+  nursingLogs  NursingLog[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -75,6 +83,7 @@ model Patient {
   user         User?    @relation(fields: [userId], references: [id])
   appointments Appointment[]
   consultations Consultation[]
+  admissions   Admission[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -134,4 +143,66 @@ model Prescription {
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model Ward {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  type      String   // General, ICU, Semi-Private, Private
+  beds      Bed[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bed {
+  id        String    @id @default(uuid())
+  bedNumber String
+  wardId    String
+  status    BedStatus @default(AVAILABLE)
+  
+  ward      Ward      @relation(fields: [wardId], references: [id])
+  admission Admission?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  @@unique([wardId, bedNumber])
+}
+
+model Admission {
+  id             String    @id @default(uuid())
+  patientId      String
+  bedId          String    @unique
+  admittingDoctorId String
+  admissionDate  DateTime  @default(now())
+  dischargeDate  DateTime?
+  reason         String
+  status         String    @default("ADMITTED") // ADMITTED, DISCHARGED
+  
+  patient        Patient   @relation(fields: [patientId], references: [id])
+  bed            Bed       @relation(fields: [bedId], references: [id])
+  doctor         Staff     @relation("AdmittingDoctor", fields: [admittingDoctorId], references: [id])
+  nursingLogs    NursingLog[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model NursingLog {
+  id           String    @id @default(uuid())
+  admissionId  String
+  nurseId      String
+  
+  // Vitals
+  bloodPressure String?
+  temperature   String?
+  pulse         String?
+  spo2          String?
+  
+  notes        String
+  
+  admission    Admission @relation(fields: [admissionId], references: [id])
+  nurse        Staff     @relation(fields: [nurseId], references: [id])
+
+  createdAt    DateTime  @default(now())
 }

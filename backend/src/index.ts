@@ -8,6 +8,7 @@ import doctorRoutes from './routes/doctor.routes';
 import appointmentRoutes from './routes/appointment.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import consultationRoutes from './routes/consultation.routes';
+import ipdRoutes from './routes/ipd.routes';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/consultations', consultationRoutes);
+app.use('/api/ipd', ipdRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
