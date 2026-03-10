@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { PrismaClient, LabRequestStatus } from '@prisma/client';
-import { generateAutoInvoice } from '../utils/billing';
 
 const prisma = new PrismaClient();
 
@@ -12,48 +11,24 @@ export const requestTest = async (req: Request, res: Response) => {
     const doctor = await prisma.staff.findUnique({ where: { userId } });
     if (!doctor) return res.status(403).json({ message: 'Doctor record not found' });
 
-    // Fetch test type details for cost
-    const testType = await prisma.testType.findUnique({ where: { id: testTypeId } });
-    if (!testType) return res.status(404).json({ message: 'Test type not found' });
-
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Create Lab Request
-      const request = await tx.labRequest.create({
-        data: {
-          patientId,
-          testTypeId,
-          requestingDoctorId: doctor.id,
-          notes
-        }
-      });
-
-      // 2. Automatically generate invoice for the test
-      await generateAutoInvoice(
+    const request = await prisma.labRequest.create({
+      data: {
         patientId,
-        doctor.id,
-        [{
-          description: `Lab Test: ${testType.name}`,
-          quantity: 1,
-          unitPrice: testType.cost,
-          amount: testType.cost
-        }],
-        testType.cost,
-        tx
-      );
-
-      return request;
+        testTypeId,
+        requestingDoctorId: doctor.id,
+        notes
+      }
     });
 
-    res.status(201).json(result);
+    res.status(201).json(request);
   } catch (error) {
-    console.error('Lab Request Error:', error);
     res.status(500).json({ message: 'Error requesting test', error });
   }
 };
 
 export const updateLabStatus = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const { status } = req.body;
 
     const updated = await prisma.labRequest.update({

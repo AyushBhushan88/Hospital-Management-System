@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { generateAutoInvoice } from '../utils/billing';
 
 const prisma = new PrismaClient();
 
@@ -16,10 +15,6 @@ export const createConsultation = async (req: Request, res: Response) => {
       notes, 
       medicines 
     } = req.body;
-
-    // Fetch doctor's fee
-    const doctor = await prisma.staff.findUnique({ where: { id: doctorId } });
-    const consultationFee = doctor?.consultationFee || 0;
 
     const consultation = await prisma.$transaction(async (tx) => {
       // 1. Create Consultation
@@ -54,22 +49,6 @@ export const createConsultation = async (req: Request, res: Response) => {
         data: { status: 'COMPLETED' }
       });
 
-      // 4. Automatically generate invoice for the consultation fee
-      if (consultationFee > 0) {
-        await generateAutoInvoice(
-          patientId,
-          doctorId,
-          [{
-            description: `Consultation Fee - Dr. ${doctor?.firstName} ${doctor?.lastName}`,
-            quantity: 1,
-            unitPrice: consultationFee,
-            amount: consultationFee
-          }],
-          consultationFee,
-          tx
-        );
-      }
-
       return con;
     });
 
@@ -82,7 +61,7 @@ export const createConsultation = async (req: Request, res: Response) => {
 
 export const getPatientHistory = async (req: Request, res: Response) => {
   try {
-    const { patientId } = req.params;
+    const { patientId } = req.params as { patientId: string };
     
     const history = await prisma.consultation.findMany({
       where: { patientId },
@@ -102,7 +81,7 @@ export const getPatientHistory = async (req: Request, res: Response) => {
 
 export const getConsultationById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const consultation = await prisma.consultation.findUnique({
       where: { id },
       include: {

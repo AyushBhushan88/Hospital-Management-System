@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { PrismaClient, BedStatus } from '@prisma/client';
-import { generateAutoInvoice } from '../utils/billing';
 
 const prisma = new PrismaClient();
 
@@ -81,32 +80,16 @@ export const admitPatient = async (req: Request, res: Response) => {
 
 export const dischargePatient = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { userId } = (req as any).user;
-
-    const staff = await prisma.staff.findUnique({ where: { userId } });
-    if (!staff) return res.status(403).json({ message: 'Staff record not found' });
+    const { id } = req.params as { id: string };
 
     const result = await prisma.$transaction(async (tx) => {
-      const current = await tx.admission.findUnique({ 
-        where: { id },
-        include: { bed: { include: { ward: true } } }
-      });
+      const current = await tx.admission.findUnique({ where: { id } });
       if (!current) throw new Error('Admission record not found');
       if (current.status === 'DISCHARGED') throw new Error('Patient already discharged');
 
-      const dischargeDate = new Date();
-      const admissionDate = new Date(current.admissionDate);
-      
-      const diffTime = Math.abs(dischargeDate.getTime() - admissionDate.getTime());
-      const stayDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-      
-      const pricePerDay = current.bed.ward.pricePerDay || 0;
-      const totalBedCharges = stayDays * pricePerDay;
-
       const updated = await tx.admission.update({
         where: { id },
-        data: { status: 'DISCHARGED', dischargeDate }
+        data: { status: 'DISCHARGED', dischargeDate: new Date() }
       });
 
       await tx.bed.update({
@@ -114,27 +97,11 @@ export const dischargePatient = async (req: Request, res: Response) => {
         data: { status: 'AVAILABLE' }
       });
 
-      if (totalBedCharges > 0) {
-        await generateAutoInvoice(
-          current.patientId,
-          staff.id,
-          [{
-            description: `IPD Stay: ${current.bed.ward.name} (${stayDays} days @ $${pricePerDay}/day)`,
-            quantity: stayDays,
-            unitPrice: pricePerDay,
-            amount: totalBedCharges
-          }],
-          totalBedCharges,
-          tx
-        );
-      }
-
       return updated;
     });
 
     res.json(result);
   } catch (error) {
-    console.error('Discharge Error:', error);
     res.status(500).json({ message: (error as any).message || 'Error discharging patient' });
   }
 };
@@ -169,7 +136,7 @@ export const createNursingLog = async (req: Request, res: Response) => {
 
 export const getAdmissionDetails = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const admission = await prisma.admission.findUnique({
       where: { id },
       include: {

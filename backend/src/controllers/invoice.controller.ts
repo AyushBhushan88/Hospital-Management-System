@@ -46,7 +46,7 @@ export const getInvoices = async (req: Request, res: Response) => {
 
 export const getInvoiceById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const invoice = await prisma.invoice.findUnique({
       where: { id },
       include: {

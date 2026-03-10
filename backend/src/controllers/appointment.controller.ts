@@ -69,15 +69,16 @@ export const getAppointments = async (req: Request, res: Response) => {
 
 export const updateAppointmentStatus = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const { status } = req.body;
 
-    const appointment = await prisma.appointment.update({
+    const updated = await prisma.appointment.update({
       where: { id },
-      data: { status: status as AppointmentStatus },
+      data: { status: status as AppointmentStatus }
     });
 
-    res.json({ message: 'Status updated successfully', appointment });
+
+    res.json({ message: 'Status updated successfully', appointment: updated });
   } catch (error) {
     res.status(500).json({ message: 'Error updating status', error });
   }

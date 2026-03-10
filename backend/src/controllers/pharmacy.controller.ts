@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { generateAutoInvoice } from '../utils/billing';
 
 const prisma = new PrismaClient();
 
@@ -50,33 +49,6 @@ export const createSale = async (req: Request, res: Response) => {
           where: { id: item.medicineId },
           data: { stock: { decrement: item.quantity } }
         });
-      }
-
-      // 3. Automatically generate invoice for the pharmacy sale
-      if (patientId) {
-        // Need to fetch medicine names for better invoice descriptions
-        const medicineIds = items.map((i: any) => i.medicineId);
-        const medicines = await tx.medicine.findMany({
-          where: { id: { in: medicineIds } }
-        });
-
-        const invoiceItems = items.map((item: any) => {
-          const medicine = medicines.find(m => m.id === item.medicineId);
-          return {
-            description: `Medicine: ${medicine?.name || 'Unknown'}`,
-            quantity: item.quantity,
-            unitPrice: item.price,
-            amount: item.quantity * item.price
-          };
-        });
-
-        await generateAutoInvoice(
-          patientId,
-          pharmacist.id,
-          invoiceItems,
-          totalAmount,
-          tx
-        );
       }
 
       return newSale;
