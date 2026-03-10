@@ -7,6 +7,8 @@ const menuItems = [
   { name: 'Patients', href: '/patients', icon: '👤' },
   { name: 'Doctors', href: '/doctors', icon: '👨‍⚕️' },
   { name: 'Ward Management', href: '/ipd/wards', icon: '🛌' },
+  { name: 'Laboratory', href: '/lab', icon: '🧪' },
+  { name: 'Pharmacy', href: '/pharmacy/inventory', icon: '💊' },
   { name: 'OPD Management', href: '/opd', icon: '🏥' },
   { name: 'IPD Management', href: '/ipd', icon: '🛌' },
   { name: 'Pharmacy', href: '/pharmacy', icon: '💊' },

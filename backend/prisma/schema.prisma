@@ -38,6 +38,13 @@ enum BedStatus {
   MAINTENANCE
 }
 
+enum LabRequestStatus {
+  PENDING
+  SAMPLE_COLLECTED
+  RESULT_REPORTED
+  CANCELLED
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -64,6 +71,9 @@ model Staff {
   consultations Consultation[]
   admissions   Admission[] @relation("AdmittingDoctor")
   nursingLogs  NursingLog[]
+  labRequests  LabRequest[] @relation("RequestingDoctor")
+  labResults   LabResult[]  @relation("LabTechnician")
+  pharmacySales PharmacySale[] @relation("Pharmacist")
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -84,6 +94,8 @@ model Patient {
   appointments Appointment[]
   consultations Consultation[]
   admissions   Admission[]
+  labRequests  LabRequest[]
+  pharmacySales PharmacySale[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -145,6 +157,8 @@ model Prescription {
   updatedAt      DateTime @updatedAt
 }
 
+// --- IPD Models ---
+
 model Ward {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -205,4 +219,77 @@ model NursingLog {
   nurse        Staff     @relation(fields: [nurseId], references: [id])
 
   createdAt    DateTime  @default(now())
+}
+
+// --- Laboratory Models ---
+
+model TestType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    String   // Blood, Imaging, etc.
+  cost        Float
+  normalRange String?
+  labRequests LabRequest[]
+}
+
+model LabRequest {
+  id              String           @id @default(uuid())
+  patientId       String
+  requestingDoctorId String
+  testTypeId      String
+  status          LabRequestStatus @default(PENDING)
+  notes           String?
+  
+  patient         Patient          @relation(fields: [patientId], references: [id])
+  doctor          Staff            @relation("RequestingDoctor", fields: [requestingDoctorId], references: [id])
+  testType        TestType         @relation(fields: [testTypeId], references: [id])
+  result          LabResult?
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model LabResult {
+  id              String     @id @default(uuid())
+  labRequestId    String     @unique
+  technicianId    String
+  resultData      Json       // { value: "140", unit: "mg/dL", observation: "Normal" }
+  attachments     String?    // URL to report PDF or Image
+  
+  labRequest      LabRequest @relation(fields: [labRequestId], references: [id])
+  technician      Staff      @relation("LabTechnician", fields: [technicianId], references: [id])
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+// --- Pharmacy Models ---
+
+model Medicine {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  brandName    String?
+  category     String?
+  dosageForm   String   // Tablet, Syrup, Injection
+  unitPrice    Float
+  stock        Int      @default(0)
+  expiryDate   DateTime?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PharmacySale {
+  id           String   @id @default(uuid())
+  patientId    String?
+  pharmacistId String
+  totalAmount  Float
+  
+  // JSON array of items: [{ medicineId: "...", quantity: 2, price: 100 }]
+  items        Json     
+  
+  patient      Patient? @relation(fields: [patientId], references: [id])
+  pharmacist   Staff    @relation("Pharmacist", fields: [pharmacistId], references: [id])
+
+  createdAt    DateTime @default(now())
 }

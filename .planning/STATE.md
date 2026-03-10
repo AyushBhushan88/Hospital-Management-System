@@ -1,7 +1,7 @@
 ## Current Status
-- **Phase:** Phase 5 (Laboratory & Pharmacy)
-- **Status:** Starting Phase 5.
-- **Latest Update:** Completed Phase 4 (IPD, Ward Management, Admissions, Nursing Logs).
+- **Phase:** Phase 6 (Billing & Financial Reporting)
+- **Status:** Starting Phase 6.
+- **Latest Update:** Completed Phase 5 (Laboratory & Pharmacy).
 
 ## Completed Milestones
 - [x] **Project Vision & Goal Defined:** Unified platform for hospital management.
@@ -13,14 +13,15 @@
 - [x] **Phase 2 OPD Flow:** Patient Registration, Doctor Management, Appointment Booking, and Dashboard complete.
 - [x] **Phase 3 Clinical Documentation:** Consultation recording, Vitals tracking, Prescription building, and EMR Timeline complete.
 - [x] **Phase 4 IPD & Hospital Operations:** Ward/Bed tracking, Admission/Discharge workflow, and Nursing Log system complete.
+- [x] **Phase 5 Laboratory & Pharmacy:** Lab test requests, result reporting, and Pharmacy inventory management complete.
 
 ## Next Steps
-- [ ] Implement Laboratory Test requests and Result reporting.
-- [ ] Build Pharmacy Inventory management.
-- [ ] Create Medicine Dispensing workflow.
+- [ ] Implement Automatic Invoicing for clinical and IPD activities.
+- [ ] Build Payment tracking and receipt generation.
+- [ ] Create Admin Analytics dashboard for revenue and operations.
 
-## Active Phase: Phase 5 (Laboratory & Pharmacy)
-- [ ] Lab Test Workflow
-- [ ] Pharmacy Inventory
-- [ ] Medicine Dispensing
+## Active Phase: Phase 6 (Billing & Financial Reporting)
+- [ ] Automatic Invoicing
+- [ ] Payment Tracking
+- [ ] Admin Analytics
 
