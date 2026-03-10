@@ -1,0 +1,18 @@
+{
+  "project_name": "Hospital Management System",
+  "version": "0.1.0",
+  "workflow": {
+    "frontend": "React/Next.js",
+    "backend": "Node.js/Express",
+    "database": "PostgreSQL",
+    "deployment": {
+      "frontend": "Vercel",
+      "backend": "Render"
+    }
+  },
+  "preferences": {
+    "style": "Modern Minimalist",
+    "mobile_first": true,
+    "rbac_enabled": true
+  }
+}

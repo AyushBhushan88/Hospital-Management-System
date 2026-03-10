@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+  PATIENT
+  LAB_TECH
+  PHARMACIST
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(PATIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff     Staff?
+  patient   Patient?
+}
+
+model Staff {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  firstName    String
+  lastName     String
+  specialization String?
+  contactNo    String?
+  address      String?
+  
+  user         User     @relation(fields: [userId], references: [id])
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Patient {
+  id           String   @id @default(uuid())
+  userId       String?  @unique
+  firstName    String
+  lastName     String
+  dob          DateTime
+  gender       Gender
+  bloodGroup   String?
+  contactNo    String
+  address      String?
+  
+  user         User?    @relation(fields: [userId], references: [id])
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
