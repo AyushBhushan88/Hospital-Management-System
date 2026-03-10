@@ -14,6 +14,7 @@ const menuItems = [
   { name: 'Pharmacy', href: '/pharmacy', icon: '💊' },
   { name: 'Lab Reports', href: '/lab', icon: '🧪' },
   { name: 'Billing', href: '/billing', icon: '💳' },
+  { name: 'Analytics', href: '/analytics', icon: '📈' },
 ];
 
 export default function Sidebar() {
