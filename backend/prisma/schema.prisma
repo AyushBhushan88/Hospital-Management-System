@@ -79,6 +79,7 @@ model Staff {
   specialization String?
   contactNo    String?
   address      String?
+  consultationFee Float @default(0)
   
   user         User     @relation(fields: [userId], references: [id])
   appointments Appointment[]

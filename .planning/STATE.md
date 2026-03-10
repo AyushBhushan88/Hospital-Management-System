@@ -25,6 +25,6 @@
 - [x] Database Schema Update (Invoice & Payment)
 - [x] Manual Invoice Creation
 - [x] Payment Recording
-- [x] Automatic Invoicing Triggers (Lab & Pharmacy)
+- [x] Automatic Invoicing Triggers (Lab, Pharmacy & Consultation)
 - [ ] Admin Analytics
 
